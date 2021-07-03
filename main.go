@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"math"
 	"math/rand"
+	"time"
 )
+
 
 type GeneticAlgorithm struct {
 	Chromosome [][]float64
@@ -15,13 +17,18 @@ type GeneticAlgorithm struct {
 }
 
 func Init() *GeneticAlgorithm{
-	chromosome := [][]float64{
-		{ 12,5,3,8 },
-		{ 2,1,8,3 },
-		{ 10,4,3,4 },
-		{ 20,1,10,6 },
-		{ 1,4,3,9 },
-		{ 20,5,7,1 },
+	rand.Seed(time.Now().UnixNano())
+	var chromosome [][]float64
+	i := 0
+	for i < 6 {
+		j :=0
+		var arr []float64
+		for j < 4 {
+			arr = append(arr, float64(rand.Intn(30 - 0) + 1))
+			j++
+		}
+		chromosome = append(chromosome, arr)
+		i++
 	}
 	return &GeneticAlgorithm{chromosome,[]float64{},[]float64{},[]float64{},[]float64{}}
 }
@@ -52,10 +59,28 @@ func (ga *GeneticAlgorithm) Selection() {
 		ga.Probabilitas = append(ga.Probabilitas, result)
 		ga.ProbabilitasCum = append(ga.ProbabilitasCum, probCum)
 	}
+
+	var Rouletes []float64
+	j := 0
+	for j < 6 {
+		Rouletes = append(Rouletes, 0+rand.Float64() * (1-0))
+		j++
+	}
+	
+	newChromosome := ga.Chromosome
+	for indexProbabAc, probabAc := range ga.ProbabilitasCum {
+		for indexRoulete, roulete := range Rouletes {
+			if probabAc > roulete && indexRoulete < 5 && probabAc < Rouletes[indexRoulete+1]  {
+				newChromosome[indexProbabAc] = ga.Chromosome[indexRoulete+1]
+			}
+		}
+	}
+	ga.Chromosome = newChromosome
 }
 
 func (ga *GeneticAlgorithm) Crossover(){
-	chromosomeChangePost := []int{0,3,4}
+	rand.Seed(time.Now().UnixNano())
+	chromosomeChangePost := []int{rand.Intn(5 - 0) + 0,rand.Intn(5 - 0) + 0,rand.Intn(5 - 0) + 0}
 	var chromosomeWillChange [][]float64
 	for _, v := range chromosomeChangePost {
 		chromosomeWillChange = append(chromosomeWillChange, ga.Chromosome[v])
@@ -76,25 +101,26 @@ func (ga *GeneticAlgorithm) Crossover(){
 }
 
 func (ga *GeneticAlgorithm) Mutation(){
-	random1 := rand.Intn(23 - 1) + 1
-	random2 := rand.Intn(23 - 1) + 1
+	rand.Seed(time.Now().UnixNano())
+	random1 := rand.Intn(24 - 1) + 1
+	random2 := (rand.Intn(24 - 1) + 1)/10
 	if random1/4 < 4 {
-		ga.Chromosome[0][random1%4] = float64(rand.Intn(30 - 1) + 1)
+		ga.Chromosome[0][random1%4] = float64(rand.Intn(30 - 0) + 0)
 	} else {
-		ga.Chromosome[random1/4][random1%4] = float64(rand.Intn(13 - 1) + 1)
+		ga.Chromosome[random1/4][random1%4] = float64(rand.Intn(30 - 0) + 0)
 	}
 
 	if random2/4 < 4 {
-		ga.Chromosome[0][random2%4] = float64(rand.Intn(13 - 1) + 1)
+		ga.Chromosome[0][random2%4] = float64(rand.Intn(30 - 0) + 0)
 	}else{
-		ga.Chromosome[random2/4][random2%4] = float64(rand.Intn(13 - 1) + 1)
+		ga.Chromosome[random2/4][random2%4] = float64(rand.Intn(30 - 0) + 0)
 	}
 }
 
 func (ga *GeneticAlgorithm) MutationCheck() bool {
 	for _,v := range ga.Chromosome {
 		if v[0] + (v[1]*2) + (v[2]*3) + (v[3]*4) == 30{
-			fmt.Println(v)
+			fmt.Println("\nBest Chromosome",v)
 			return true
 		}
 	}
@@ -104,17 +130,32 @@ func (ga *GeneticAlgorithm) MutationCheck() bool {
 
 func  main()  {
 	ga := Init()
+	fmt.Println("Inisialiasi")
+	fmt.Println(ga.Chromosome)
+	fmt.Println("Evaluation")
+
 	generation := 0
 	for {
 		ga.Evaluation()
+		fmt.Println(ga.ObjectiveFunction)
+	
+		fmt.Println("Selection")
 		ga.Selection()
+		fmt.Println("Fitnes", ga.Fitness)
+		fmt.Println("Probability",ga.Probabilitas)
+		fmt.Println("Cumulative Probability",ga.ProbabilitasCum)
+		fmt.Println("After Selection",ga.Chromosome)
+	
 		ga.Crossover()
+		fmt.Println("Crossover", ga.Chromosome)
 		ga.Mutation()
+		fmt.Println("Mutation", ga.Chromosome)
 		res := ga.MutationCheck()
 		if(res){
 			fmt.Println(generation, "Generation")
 			break
 		}
+		fmt.Println()
 		generation++
 	}
 }
