@@ -68,10 +68,10 @@ func (ga *GeneticAlgorithm) Selection() {
 	}
 	
 	newChromosome := ga.Chromosome
-	for indexProbabAc, probabAc := range ga.ProbabilitasCum {
-		for indexRoulete, roulete := range Rouletes {
-			if probabAc > roulete && indexRoulete < 5 && probabAc < Rouletes[indexRoulete+1]  {
-				newChromosome[indexProbabAc] = ga.Chromosome[indexRoulete+1]
+	for indexRoulete, roulete := range Rouletes {
+		for indexProbab, probab := range ga.ProbabilitasCum{
+			if roulete > probab && indexProbab < 5 && roulete < ga.ProbabilitasCum[indexProbab+1] {
+				newChromosome[indexRoulete] = ga.Chromosome[indexProbab]
 			}
 		}
 	}
